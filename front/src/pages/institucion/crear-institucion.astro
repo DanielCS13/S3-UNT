@@ -1,0 +1,118 @@
+---
+import Navbar from "../../components/Navbar.astro";
+import Layout from "../../layout/Layout.astro";
+---
+
+<Layout title="Casa Manu">
+    <Navbar />
+    <main class="flex justify-center items-center h-fit mb-10">
+        <form id="upload-form" class="flex flex-col max-w-md border border-gray-400 rounded-xl p-10 space-y-6 shadow-lg shadow-stone-400">
+            <h1 class="text-center font-bold text-4xl">Crear institución</h1>
+            <p class="text-gray-700 text-md">Ingresa los siguientes datos para crear la nueva institución.</p>
+            
+            <div class="flex flex-col space-y-4">
+                <div class="flex flex-col space-y-2">
+                    <label class="font-semibold text-lg" for="name">Nombre</label>
+                    <input 
+                        class="border-gray-300 border-2 p-2 rounded-md outline-none"
+                        placeholder="Ingresar nombre de la institución"
+                        type="text" id="name" name="name" required />
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <label class="font-semibold text-lg" for="dropzone-file">Imagen referencial</label>
+
+                    <div class="flex items-center justify-center w-full">
+                        <label id="label-dropzone-file" for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                            <div id="dropzone-text" class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <i class="fa-solid fa-cloud-arrow-up text-gray-500 text-3xl"></i>
+                                <p class="mb-2 text-sm text-gray-500">
+                                    <span class="font-semibold">Click para subir</span> o arrastrar y arrojar.
+                                </p>
+                                <p class="text-xs text-gray-500">SVG, PNG, JPG</p>
+                            </div>
+                            <input 
+                                id="dropzone-file" 
+                                type="file" 
+                                class="hidden" 
+                                accept=".svg, .png, .jpg" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center">
+                <button 
+                    id="submit-button"
+                    class="text-white font-semibold bg-black rounded-lg p-2 px-8 w-fit hover:scale-110 transition-all"
+                    type="button">Crear casa</button>
+            </div>
+        </form>
+    </main>
+</Layout>
+
+<script>
+import axios from 'axios';
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dropzoneFileInput = document.getElementById('dropzone-file');
+    const dropzoneText = document.getElementById('dropzone-text');
+    const labelDropzoneFile = document.getElementById('label-dropzone-file');
+
+    dropzoneFileInput.addEventListener('change', function(event) {
+        const fileName = dropzoneFileInput.files.length > 0 ? dropzoneFileInput.files[0].name : 'Ningún archivo seleccionado';
+        dropzoneText.innerHTML = `<p class="text-stone-500 font-semibold text-lg">${fileName}</p>`;
+        labelDropzoneFile.classList.add('bg-stone-200');
+    });
+
+    labelDropzoneFile.addEventListener('dragover', function(event) {
+        event.preventDefault();
+        labelDropzoneFile.classList.add('bg-gray-200');
+    });
+
+    labelDropzoneFile.addEventListener('dragleave', function(event) {
+        event.preventDefault();
+        labelDropzoneFile.classList.remove('bg-gray-200');
+    });
+
+    labelDropzoneFile.addEventListener('drop', function(event) {
+        event.preventDefault();
+        labelDropzoneFile.classList.remove('bg-gray-200');
+        const file = event.dataTransfer.files[0];
+        dropzoneFileInput.files = event.dataTransfer.files;  // Esto es para que el input de archivo tenga el archivo arrastrado
+        const fileName = file ? file.name : 'Ningún archivo seleccionado';
+        dropzoneText.innerHTML = `<p class="text-stone-500 font-semibold text-lg">${fileName}</p>`;
+        labelDropzoneFile.classList.add('bg-stone-200');
+    });
+
+    // Función para enviar el formulario con axios
+    async function submitForm() {
+        const file = dropzoneFileInput.files[0];
+        const name = document.getElementById('name').value;
+
+        if (!file) {
+            alert('Por favor, selecciona un archivo.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('name', name);
+
+        try {
+            const response = await axios.post('http://localhost:3000/api/institution', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            console.log('Respuesta del servidor:', response.data);
+            alert('Archivo subido exitosamente.');
+        } catch (error) {
+            console.error('Error al subir el archivo:', error);
+            alert('Error al subir el archivo.');
+        }
+    }
+
+    // Asocia la función submitForm con el botón de enviar
+    document.getElementById('submit-button').addEventListener('click', submitForm);
+});
+</script>

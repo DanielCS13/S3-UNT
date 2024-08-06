@@ -1,0 +1,119 @@
+---
+import Navbar from "../../components/Navbar.astro"
+import Layout from "../../layout/Layout.astro"
+import axios from "axios";
+
+    const intitutions = await axios.get("http://localhost:3000/api/institution/get-all");
+    console.log("casas")
+    console.log(intitutions.data);
+---
+
+<Layout title="Casa Manu" >
+        <Navbar />
+	  <main class="flex justify-center items-center h-fit mb-10">
+		<form 
+		class="flex flex-col max-w-md border border-gray-400 rounded-xl p-10 space-y-6 shadow-lg shadow-stone-400"
+		>
+			<h1 class="text-center font-bold text-4xl">Crear personal</h1>
+			<p class="text-gray-700 text-md" >Ingresa los siguientes datos para crear al nuevo personal con acceso.</p>
+			
+            <div class="flex flex-col space-y-4">
+                <div class="flex flex-col space-y-2" >
+                    <label class="font-semibold text-lg" for="email">Nombre</label>
+                    <input 
+                    class="border-gray-300 border-2 p-2 rounded-md outline-none"
+                    placeholder="Ingresar nombre del personal"
+                    type="text" id="name" name="name" required />
+                </div>
+                <div class="flex flex-col space-y-2" >
+                    <label class="font-semibold text-lg" for="email">Correo</label>
+                    <input 
+                    class="border-gray-300 border-2 p-2 rounded-md outline-none"
+                    placeholder="personal-casa@gmail.com"
+                    type="email" id="email" name="email" required />
+                </div>
+                <div class="flex flex-col space-y-2" >
+                    <label class="font-semibold text-lg" for="role">Rol</label>
+                    <div class="relative">
+                      <select 
+                      class="border-gray-300 border-2 p-2 rounded-md w-full outline-none appearance-none"
+                      id="role" name="role" required >
+                          <option value="Administrador">Administrador</option>
+                          <option value="Personal">Personal</option>
+                      </select>
+                      <i class="fa-solid fa-chevron-down absolute top-0 right-2 h-full grid place-content-center pointer-events-none "></i>
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-2" >
+                    <label class="font-semibold text-lg" for="institution">Institución</label>
+                    <div class="relative">
+                      <select 
+                      class="border-gray-300 border-2 p-2 rounded-md w-full outline-none appearance-none"
+                      id="institution" name="institution" required >
+                          {
+                              intitutions.data.map((institution) => (
+                                  <option value={institution._id}>{institution.nameInstitution}</option>
+                                ))
+                              }
+                              <option value="Todas">Todas</option>
+                      </select>
+                      <i class="fa-solid fa-chevron-down absolute top-0 right-2 h-full grid place-content-center pointer-events-none "></i>
+                    </div>
+                <div class="flex flex-col space-y-2" >
+                    <div class="flex flex-row " >
+                        <label class="font-semibold text-lg" for="password">Contraseña</label>
+                    </div>
+                    <input 
+                    class="border-gray-300 border-2 p-2 rounded-md outline-none"
+                    placeholder="Ingresar contraseña"
+                    type="password" id="password" name="password" required />
+                </div>
+            </div>
+			<div class="flex justify-center" >
+				<button 
+			class="text-white font-semibold bg-black rounded-lg p-2 px-8 w-fit hover:scale-110 transition-all"
+			type="submit">Crear personal</button>
+			</div>
+		</form>
+
+        
+        
+	  </main>
+</Layout>
+
+<script>
+    import axios from "axios";
+
+    document.querySelector("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = (document.querySelector("#name") as HTMLInputElement)
+        .value;
+      const email = (document.querySelector("#email") as HTMLInputElement)
+        .value;
+      const role = (document.querySelector("#role") as HTMLInputElement)
+        .value;
+      const idInstitution = (document.querySelector("#institution") as HTMLInputElement)
+        .value;
+      console.log(idInstitution)
+      const password = (document.querySelector("#password") as HTMLInputElement)
+        .value;
+
+      const response = await axios.post("http://localhost:3000/api/user", {
+        name,
+        email,
+        role,
+        idInstitution,
+        password
+      });
+      if (response.status === 201) {
+        (document.querySelector("#name") as HTMLInputElement).value = "";
+        (document.querySelector("#email") as HTMLInputElement).value = "";
+        // (document.querySelector("#role") as HTMLInputElement).value = "";
+        // (document.querySelector("#institution") as HTMLInputElement).value = "";
+        (document.querySelector("#password") as HTMLInputElement).value = "";
+        window.location.href = "/personal";
+      } else {
+        alert("Error al crear el servicio");
+      }
+    });
+  </script>

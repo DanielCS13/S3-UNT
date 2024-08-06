@@ -1,0 +1,97 @@
+---
+
+interface Props {
+    id: string;
+    name: string;
+    role: string;
+    idInstitution: string;
+    state: string;
+}
+
+const {id, name, role, idInstitution, state} = Astro.props;
+import axios from 'axios';
+// create a get by id with axios
+let institution = "";
+
+if (idInstitution === "Todas") {
+    institution = "Todas";
+} else {
+    try {
+        console.log(idInstitution)
+        const response = await axios.get(`http://localhost:3000/api/institution/${idInstitution}`);
+        console.log("response:", response)
+        institution = response.data.nameInstitution;
+    } catch (error) {
+        institution = "Ninguna";
+        console.error(error)
+    }
+}
+---
+
+<div class="relative grid grid-cols-12 text-gray-600 border-t border-gray-400 p-2" >
+    
+
+    <div class="col-span-4 text-black " >{name}</div>
+    
+    <div class="col-span-2 text-black " >{role}</div>
+
+    <div class="col-span-2 text-black " >{institution}</div>
+    
+    <div class="col-span-2 flex flex-row justify-between items-center" >
+        {
+            state === "Activo" ?
+            <div class="bg-green-500 text-white font-medium px-2 py-1 rounded-md">
+                <span>Activo</span>
+            </div>
+            :
+            <div class="bg-red-500 text-white font-medium px-2 py-1 rounded-md">
+                <span>Bloqueado</span>
+            </div>
+        }
+    </div>
+
+    <div class="col-span-2 flex flex-row space-x-2 items-center" >
+        <input type="hidden" id={`idWorker-${id}`} value={id}>
+        <button 
+        class="delete bg-red-500 text-white h-7 aspect-square rounded-md"
+        >
+            <i class="fa-solid fa-trash"></i>
+        </button>
+        <button 
+        class="edit bg-sky-500 text-white h-7 aspect-square rounded-md"
+        >
+            <i class="fa-solid fa-pencil"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    import axios from "axios";
+    import { isPopUpOpen, idUser } from "../utils/popUp";
+
+    document.querySelectorAll('.delete').forEach(button => {
+        button.addEventListener('click', async function() {
+            const idWorker = this.parentElement.querySelector('input[type="hidden"]').value;
+
+            const response = await axios.delete(`http://localhost:3000/api/user/${idWorker}`);
+            
+            if (response.status === 200) {
+                window.location.href = "/personal";
+            } else {
+                alert("Error al eliminar el usuario");
+            }
+        });
+    });
+
+    document.querySelectorAll('.edit').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const idWorker = this.parentElement.querySelector('input[type="hidden"]').value;
+
+            idUser.set(idWorker);
+            isPopUpOpen.set(!isPopUpOpen.get());
+        });
+    });
+
+  </script>

@@ -1,0 +1,72 @@
+---
+import Layout from "../layout/Layout.astro"
+---
+
+<Layout title="Casa Manu" >
+	  <main class="flex justify-center items-center h-screen">
+		<form 
+		class="flex flex-col max-w-md border border-gray-400 rounded-xl p-10 space-y-6 shadow-lg shadow-stone-400"
+		>
+			<h1 class="text-center font-bold text-4xl">Ingresar</h1>
+			<p class="text-gray-700 text-md" >Ingresa tu correo y contraseña para acceder a la Casa de la cultura Estrella Arroyonde Guedes.</p>
+			<div class="flex flex-col space-y-2" >
+				<label class="font-semibold text-lg" for="email">Correo</label>
+				<input 
+				class="border-gray-300 border-2 p-2 rounded-md outline-none"
+				placeholder="personal-casa@gmail.com"
+				type="email" id="email" name="email" required />
+			</div>
+			<div class="flex flex-col space-y-2" >
+				<div class="flex flex-row justify-start" >
+					<label class="font-semibold text-lg" for="password">Contraseña</label>
+					<!-- <a href="#" class="text-sm font-medium underline underline-offset-[6px]">¿Olvidaste tu contraseña?</a> -->
+				</div>
+				<input 
+				class="border-gray-300 border-2 p-2 rounded-md outline-none"
+				type="password" id="password" name="password" required />
+			</div>
+			<p id="error" class="text-red-500 font-medium hidden">Su correo y/o contraseña son incorrectas, vuelva a intentarlo.</p>
+			<div class="flex justify-center" >
+				<button 
+				type="submit"
+				class="text-white font-semibold bg-black rounded-lg p-2 px-8 w-fit hover:scale-110 transition-all">
+				Ingresar</button>
+			</div>
+		</form>
+	  </main>
+</Layout>
+
+<script>
+	import axios from "axios";
+
+	document.querySelector("form").addEventListener("submit", async (e) => {
+		e.preventDefault();
+		const email = (document.querySelector("#email") as HTMLInputElement)
+			.value;
+		const password = (document.querySelector("#password") as HTMLInputElement)
+			.value;
+
+		try {
+			const response = await axios.post("http://localhost:3000/api/auth/login", {
+				email,
+				password,
+			});
+
+			if (response.status === 200) {
+				// console.log(response.data)
+				// save token in local storage
+				localStorage.setItem("id", response.data._id);
+				localStorage.setItem("name", response.data.name);
+				localStorage.setItem("role", response.data.role);
+				window.location.href = "/institucion";
+			} else {
+				document.querySelector("#error").classList.remove("hidden");
+			}
+		} catch (error) {
+			document.querySelector("#error").classList.remove("hidden");
+		}
+		
+	});
+
+
+</script>

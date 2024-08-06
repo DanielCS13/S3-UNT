@@ -1,0 +1,108 @@
+---
+import Layout from "../../layout/Layout.astro";
+import Navbar from "../../components/Navbar.astro";
+import Archivo from "../../components/Archivo.jsx";
+interface Params {
+    id: string;
+}
+
+const {id} = Astro.params;
+
+const idTransformed = id.split("-").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+
+import axios from "axios";
+const response = await axios.get(`http://localhost:3000/api/institution/get-id/${id}`);
+const idInstitution = response.data._id
+
+---
+
+<Layout title="Lista de Casas">
+    <Navbar />
+    <section class="mx-auto max-w-screen-lg  gap-8 p-6 mb-10 shadow-lg shadow-stone-300 rounded-lg">
+        <h1 class="font-bold text-3xl mb-4" >{idTransformed}</h1>
+
+        <input type="hidden" name="idInst" id="idInst" value={idInstitution}>
+
+        <div class="flex items-center justify-center w-full">
+            <label id="label-dropzone-file" for="dropzone-file" class="flex flex-col items-center justify-center w-full h-28 mb-8 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                <div id="dropzone-text" class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <i class="fa-solid fa-cloud-arrow-up text-gray-500 text-3xl"></i>
+                    <p class="mb-2 text-sm text-gray-500">
+                        <span class="font-semibold">Click para subir</span> o arrastrar y arrojar.
+                    </p>
+                    <p class="text-xs text-gray-500">Todo tipo de archivo</p>
+                </div>
+                <input id="dropzone-file" type="file" class="hidden" />
+            </label>
+        </div>
+
+
+
+        <Archivo idInstitution={idInstitution} client:load />
+    </section>
+</Layout>
+
+<script>
+    import axios from 'axios';
+    import { newFileUpload } from '../../utils/popUp';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropzoneFileInput = document.getElementById('dropzone-file');
+        const dropzoneText = document.getElementById('dropzone-text');
+        const labelDropzoneFile = document.getElementById('label-dropzone-file');
+
+        dropzoneFileInput.addEventListener('change', async function(event) {
+            await handleFileUpload(dropzoneFileInput.files[0]);
+        });
+
+        labelDropzoneFile.addEventListener('dragover', function(event) {
+            event.preventDefault();
+            labelDropzoneFile.classList.add('bg-gray-200');
+        });
+
+        labelDropzoneFile.addEventListener('dragleave', function(event) {
+            event.preventDefault();
+            labelDropzoneFile.classList.remove('bg-gray-200');
+        });
+
+        labelDropzoneFile.addEventListener('drop', async function(event) {
+            event.preventDefault();
+            labelDropzoneFile.classList.remove('bg-gray-200');
+            const file = event.dataTransfer.files[0];
+            await handleFileUpload(file);
+        });
+
+        async function handleFileUpload(file) {
+            if (!file) {
+                alert('Por favor, selecciona un archivo.');
+                return;
+            }
+
+            const idInst = document.getElementById('idInst').value;
+            const idUser = localStorage.getItem('id');
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('idInst', idInst);
+            formData.append('idUser', idUser);
+
+            try {
+                const response = await axios.post('http://localhost:3000/api/file/', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                console.log('Respuesta del servidor:', response.data);
+                dropzoneText.innerHTML = `
+                    <p class="text-green-400 font-semibold text-lg">Archivo subido exitosamente.</p>
+                `;
+                labelDropzoneFile.classList.add('bg-green-100');
+                newFileUpload.set(!newFileUpload.get())
+            } catch (error) {
+                console.error('Error al subir el archivo:', error);
+                alert('Error al subir el archivo.');
+            }
+        }
+    });
+</script>

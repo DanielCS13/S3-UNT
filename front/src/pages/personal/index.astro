@@ -1,0 +1,61 @@
+---
+import Layout from "../../layout/Layout.astro";
+import Navbar from "../../components/Navbar.astro";
+import Personal from "../../components/Personal.astro";
+import PopUp from '../../components/PopUp.jsx';
+interface Params {
+    id: string;
+}
+
+const {id} = Astro.params;
+
+import axios from "axios";
+
+// create a get request with axios
+const response = await axios.get("http://localhost:3000/api/user")
+const workers = response.data
+---
+
+<Layout title="Lista de Casas">
+    
+    
+    <Navbar />
+    
+    <section class="mx-auto max-w-screen-lg  gap-8 p-6 mb-10 shadow-lg shadow-stone-300 rounded-lg">
+        <h1 class="font-bold text-3xl mb-4" >{id}</h1>
+        <div class="flex flex-row justify-between mb-4">
+            <h1 class="font-bold text-xl">Lista de personal</h1>
+            <a href="/personal/crear-personal" 
+            class="text-white bg-green-500 hover:bg-green-600 transition-all duration-300 px-3 py-2 rounded-md space-x-1" >
+                <i class="fa-solid fa-user-plus"></i>
+                <span class="font-semibold">Nuevo personal</span>
+            </a>
+        </div>
+        <div class="*:gap-x-6 flex flex-col">
+            <div class="grid grid-cols-12 font-semibold text-lg mb-4 px-2" >
+                <div class="col-span-4" >Nombre</div>
+                <div class="col-span-2" >Cargo</div>
+                <div class="col-span-2" >Institución</div>
+                <div class="col-span-2" >Estado</div>
+                <div class="col-span-2" >Acciones</div>
+            </div>
+
+            <PopUp client:idle />
+
+
+            {
+                workers.map((worker) => {
+                    return (
+                        <Personal
+                        id={worker._id}
+                        name={worker.name} 
+                        role={worker.role}
+                        state={worker.state}
+                        idInstitution={worker.idInstitution}
+                        />
+                    )
+                })
+            }        
+            </div>
+    </section>
+</Layout>

@@ -1,0 +1,33 @@
+---
+interface Props {
+    name: string;
+    urlImage: string;
+}
+
+const { name, urlImage } = Astro.props;
+const nameToUrl = name.toLowerCase().replace(/\s/g, "-");
+---
+<article 
+    class="flex flex-col shadow-stone-300 shadow-sm 
+    hover:scale-105 hover:shadow-lg hover:shadow-stone-400 transition-all duration-300 
+    rounded-xl overflow-hidden">
+    <div class="relative" >
+        <div class="max-h-52 overflow-hidden">
+            <img class="w-full h-60" src={urlImage} alt="">
+        </div>
+        <div class="absolute bottom-0 h-full w-full bg-gradient-to-t from-black via-30% to-transparent to-50%"/>
+        <div class="absolute bottom-0 p-4 text-white" >
+            <h2 class="text-2xl font-semibold " >{name}</h2>
+            </div>
+    </div>
+    <div class="flex flex-row p-2 space-x-4 text-center bg-white">
+        <a class="bg-sky-500 hover:bg-sky-600 transition-all duration-300 text-white font-medium w-full py-1 rounded-md" href=`/institucion/${nameToUrl}`>
+            <i class="fa-solid fa-location-arrow"></i>
+            Ingresar
+        </a>
+        <!-- <a class="bg-red-500 hover:bg-red-600 transition-all duration-300 text-white font-medium w-full py-1 rounded-md" href="">
+            <i class="fa-solid fa-trash"></i>
+            Eliminar
+        </a> -->
+    </div>
+</article>
